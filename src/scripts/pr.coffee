@@ -1,10 +1,6 @@
 # Description
 #   A Hubot script that list / merge the pull request
 #
-# Dependencies:
-#   "github": "^0.2.1",
-#   "q": "^1.0.1"
-#
 # Configuration:
 #   HUBOT_PR_DEFAULT_USERNAME
 #   HUBOT_PR_TOKEN
