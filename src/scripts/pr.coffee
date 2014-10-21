@@ -14,44 +14,13 @@
 #   bouzuya <m@bouzuya.net>
 #
 {Promise} = require 'q'
-GitHub = require 'github'
+{PullRequestManager} = require '../pull-request-manager'
 
 module.exports = (robot) ->
 
   # cancel timer
   timeout = parseInt (process.env.HUBOT_PR_TIMEOUT ? '30000'), 10
   timeoutId = null
-
-  newClient = ->
-    github = new GitHub version: '3.0.0'
-    github.authenticate
-      type: 'oauth'
-      token: process.env.HUBOT_PR_TOKEN
-    github
-
-  listPullRequests = (github, user, repo) ->
-    new Promise (resolve, reject) ->
-      github.pullRequests.getAll { user, repo }, (err, ret) ->
-        if err?
-          reject err
-        else
-          resolve ret
-
-  getPullRequest = (github, user, repo, number) ->
-    new Promise (resolve, reject) ->
-      github.pullRequests.get { user, repo, number }, (err, ret) ->
-        if err?
-          reject err
-        else
-          resolve ret
-
-  mergePullRequest = (github, user, repo, number) ->
-    new Promise (resolve, reject) ->
-      github.pullRequests.merge { user, repo, number }, (err, ret) ->
-        if err?
-          reject err
-        else
-          resolve ret
 
   cancel = (res) ->
     if timeoutId?
@@ -60,8 +29,8 @@ module.exports = (robot) ->
       timeoutId = null
 
   list = (res, user, repo) ->
-    client = newClient()
-    listPullRequests client, user, repo
+    client = new PullRequestManager()
+    client.list(user, repo)
       .then (pulls) ->
         return if pulls.length is 0
         message = pulls
@@ -79,9 +48,8 @@ module.exports = (robot) ->
     if timeoutId?
       res.send 'wait for merging...'
       return
-    client = newClient()
-    Promise.resolve()
-      .then -> getPullRequest client, user, repo, number
+    client = new PullRequestManager()
+    client.get(user, repo, number)
       .then (result) ->
         res.send """
           \##{result.number} #{result.title}
@@ -95,7 +63,7 @@ module.exports = (robot) ->
           timeoutId = setTimeout resolve, timeout
       .then ->
         timeoutId = null
-        mergePullRequest(client, user, repo, number)
+        client.merge(user, repo, number)
       .then (result) ->
         res.send result.message
       .then null, (err) ->
