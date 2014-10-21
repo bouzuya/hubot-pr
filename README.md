@@ -17,7 +17,7 @@ or
 
     bouzuya> hubot help pr
       hubot> hubot pr [<user>/]<repo> - list pull requests
-      hubot> hubot pr [<user>/]<repo> <N> - merge a pull request
+      hubot> hubot pr [<user>/]<repo> #<N> - merge a pull request
 
     (list)
     bouzuya> hubot pr hitoridokusho/hibot
@@ -26,13 +26,13 @@ or
              #2 pull request 2
                https://github.com/hitoridokusho/hibot/pull/2
     (merge)
-    bouzuya> hubot pr hitoridokusho/hibot 2
+    bouzuya> hubot pr hitoridokusho/hibot #2
       hubot> #2 pull request 2
              hitoridokusho:master <- bouzuya:add-hubot-merge-pr
              https://github.com/hitoridokusho/hibot/pull/2
-             i will start to merge after 30 s
-             (you can stop it if you type "cancel")
-      hubot> Pull Request successfully merged
+             OK ? [yes/no]
+    bouzuya> yes
+      hubot> merged: hitoridokusho/hibot#2 : Pull Request successfully merged
 
     (HUBOT_PR_DEFAULT_USERNAME=hitoridokusho)
     (list)
@@ -42,13 +42,13 @@ or
              #2 pull request 2
                  https://github.com/hitoridokusho/hibot/pull/2
     (merge)
-    bouzuya> hubot pr hibot 2
+    bouzuya> hubot pr hibot #2
       hubot> #2 pull request 2
              hitoridokusho:master <- bouzuya:add-hubot-merge-pr
              https://github.com/hitoridokusho/hibot/pull/2
-             i will start to merge after 30 s
-             (you can stop it if you type "cancel")
-      hubot> Pull Request successfully merged
+             OK ? [yes/no]
+    bouzuya> no
+      hubot> canceled: hitoridokusho/hibot#2
 
 See [`src/scripts/pr.coffee`](src/scripts/pr.coffee) for full documentation.
 
