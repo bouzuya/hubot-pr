@@ -3,7 +3,6 @@ GitHub = require 'github'
 
 class PullRequestManager
   constructor: ({ token } = {}) ->
-    token ?= process.env.HUBOT_PR_TOKEN
     @github = new GitHub version: '3.0.0'
     @github.authenticate
       type: 'oauth'

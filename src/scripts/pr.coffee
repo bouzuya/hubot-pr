@@ -22,6 +22,9 @@ module.exports = (robot) ->
   timeout = parseInt (process.env.HUBOT_PR_TIMEOUT ? '30000'), 10
   timeoutId = null
 
+  client = ->
+    new PullRequestManager(token: process.env.HUBOT_PR_TOKEN)
+
   cancel = (res) ->
     if timeoutId?
       clearTimeout timeoutId
@@ -29,7 +32,7 @@ module.exports = (robot) ->
       timeoutId = null
 
   list = (res, user, repo) ->
-    client = new PullRequestManager()
+    client = client()
     client.list(user, repo)
       .then (pulls) ->
         return if pulls.length is 0
@@ -48,7 +51,7 @@ module.exports = (robot) ->
     if timeoutId?
       res.send 'wait for merging...'
       return
-    client = new PullRequestManager()
+    client = client()
     client.get(user, repo, number)
       .then (result) ->
         res.send """
