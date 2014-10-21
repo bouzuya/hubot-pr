@@ -44,7 +44,7 @@ module.exports = (robot) ->
           .join '\n'
         res.send message
       .then null, (err) ->
-        robot.logger.error err
+        res.robot.logger.error err
         res.send 'hubot-pr: error'
 
   merge = (res, user, repo, number) ->
@@ -70,7 +70,7 @@ module.exports = (robot) ->
       .then (result) ->
         res.send result.message
       .then null, (err) ->
-        robot.logger.error err
+        res.robot.logger.error err
         res.send 'hubot-pr: error'
 
   robot.respond /pr\s+(?:([^\/]+)\/)?(\S+)(?:\s+(\d+))?\s*$/i, (res) ->
