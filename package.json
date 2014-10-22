@@ -1,6 +1,6 @@
 {
   "name": "hubot-pr",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "A Hubot script that list / merge the pull request",
   "main": "index.js",
   "scripts": {
