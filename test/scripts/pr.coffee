@@ -51,84 +51,80 @@ describe 'pr', ->
       done()
     @robot.shutdown()
 
-  describe 'listeners[0].regex (pr)', ->
-    beforeEach ->
-      @sender = new User 'bouzuya', room: 'hitoridokusho'
-      @callback = @sinon.spy()
-      @robot.listeners[0].callback = @callback
+  describe 'patterns', ->
+    [
+      [
+        message: 'hubot pr hitoridokusho/hibot'
+        matches: [
+          'hubot pr hitoridokusho/hibot'
+          'hitoridokusho'
+          'hibot'
+          undefined
+        ]
+      ,
+        message: 'hubot pr hitoridokusho/hibot #1'
+        matches: [
+          'hubot pr hitoridokusho/hibot #1'
+          'hitoridokusho'
+          'hibot'
+          '1'
+        ]
+      ,
+        message: 'hubot pr hibot'
+        matches: [
+          'hubot pr hibot'
+          undefined
+          'hibot'
+          undefined
+        ]
+      ,
+        message: 'hubot pr hibot #1'
+        matches: [
+          'hubot pr hibot #1'
+          undefined
+          'hibot'
+          '1'
+        ]
+      ]
+    ,
+      [
+        message: 'yes'
+        matches: ['yes']
+      ,
+        message: 'y'
+        matches: ['y']
+      ,
+        message: 'Y'
+        matches: ['Y']
+      ]
+    ,
+      [
+        message: 'no'
+        matches: ['no']
+      ,
+        message: 'n'
+        matches: ['n']
+      ,
+        message: 'N'
+        matches: ['N']
+      ]
+    ].forEach (tests, index) ->
+      describe "listeners[#{index}].regex", ->
+        tests.forEach ({ message, matches }) ->
+          beforeEach ->
+            @index = index
+            @message = message
+            @matches = matches
 
-    describe 'receive "@hubot pr hitoridokusho/hibot "', ->
-      beforeEach ->
-        message = '@hubot pr hitoridokusho/hibot '
-        @robot.adapter.receive new TextMessage(@sender, message)
-
-      it 'calls with "@hubot pr hitoridokusho/hibot "', ->
-        assert @callback.callCount is 1
-        match = @callback.firstCall.args[0].match
-        assert match.length is 4
-        assert match[0] is '@hubot pr hitoridokusho/hibot '
-        assert match[1] is 'hitoridokusho'
-        assert match[2] is 'hibot'
-        assert match[3] is undefined
-
-    describe 'receive "@hubot pr hitoridokusho/hibot 2 "', ->
-      beforeEach ->
-        message = '@hubot pr hitoridokusho/hibot 2 '
-        @robot.adapter.receive new TextMessage(@sender, message)
-
-      it 'calls with "@hubot pr hitoridokusho/hibot 2 "', ->
-        assert @callback.callCount is 1
-        match = @callback.firstCall.args[0].match
-        assert match.length is 4
-        assert match[0] is '@hubot pr hitoridokusho/hibot 2 '
-        assert match[1] is 'hitoridokusho'
-        assert match[2] is 'hibot'
-        assert match[3] is '2'
-
-    describe 'receive "@hubot pr hibot "', ->
-      beforeEach ->
-        message = '@hubot pr hibot '
-        @robot.adapter.receive new TextMessage(@sender, message)
-
-      it 'calls with "@hubot pr hibot "', ->
-        assert @callback.callCount is 1
-        match = @callback.firstCall.args[0].match
-        assert match.length is 4
-        assert match[0] is '@hubot pr hibot '
-        assert match[1] is undefined
-        assert match[2] is 'hibot'
-        assert match[3] is undefined
-
-    describe 'receive "@hubot pr hibot 2 "', ->
-      beforeEach ->
-        message = '@hubot pr hibot 2 '
-        @robot.adapter.receive new TextMessage(@sender, message)
-
-      it 'calls with "@hubot pr hibot 2 "', ->
-        assert @callback.callCount is 1
-        match = @callback.firstCall.args[0].match
-        assert match.length is 4
-        assert match[0] is '@hubot pr hibot 2 '
-        assert match[1] is undefined
-        assert match[2] is 'hibot'
-        assert match[3] is '2'
-
-  describe 'listeners[1].regex (cancel)', ->
-    beforeEach ->
-      @sender = new User 'bouzuya', room: 'hitoridokusho'
-      @callback = @sinon.spy()
-      @robot.listeners[1].callback = @callback
-
-    describe 'receive "??? cancel ???"', ->
-      beforeEach ->
-        message = '??? cancel ???'
-        @robot.adapter.receive new TextMessage(@sender, message)
-
-      it 'calls with "cancel"', ->
-        assert @callback.callCount is 1
-        match = @callback.firstCall.args[0].match
-        assert match.length is 1
-        assert match[0] is 'cancel'
+          describe 'receive ' + message, ->
+            it 'should match', ->
+              callback = @sinon.spy()
+              @robot.listeners[@index].callback = callback
+              sender = new User 'bouzuya', room: 'hitoridokusho'
+              @robot.adapter.receive new TextMessage(sender, @message)
+              actualMatches = callback.firstCall.args[0].match.map((i) -> i)
+              assert callback.callCount is 1
+              assert.deepEqual actualMatches, @matches
 
   describe 'listeners[0].callback (pr)', ->
     beforeEach ->
@@ -157,7 +153,7 @@ describe 'pr', ->
             done e
         , 10
 
-    describe 'receive "@hubot pr hibot 1" (use default username)', ->
+    describe 'receive "@hubot pr hibot #1" (use default username)', ->
       beforeEach ->
         {pullRequests} = require 'github/api/v3.0.0/pullRequests'
         @sinon.stub pullRequests, 'get', (msg, block, callback) =>
@@ -165,23 +161,23 @@ describe 'pr', ->
         @sinon.stub pullRequests, 'merge', (msg, block, callback) =>
           callback null, @sampleMergeResult
         @pr
-          match: ['@hubot pr hibot', undefined, 'hibot', '1']
+          match: ['@hubot pr hibot #1', undefined, 'hibot', '1']
           send: @send
+          message:
+            user:
+              id: 1
 
-      it 'merges [hitoridokusho/]hibot 1', (done) ->
+      it 'merges [hitoridokusho/]hibot #1', (done) ->
         setTimeout =>
           try
-            assert @send.callCount is 2
+            assert @send.callCount is 1
             assert @send.firstCall.args[0] is """
               #1 TITLE
               hitoridokusho:master <- bouzuya:add-hubot-merge-pr
               https://github.com/hitoridokusho/hibot/pull/1
 
-              i will start to merge after 0 s
-              (you can stop it if you type "cancel")
+              OK ? [yes/no]
               """
-            assert @send.secondCall.args[0] is \
-              'Pull Request successfully merged'
             done()
           catch e
             done e
